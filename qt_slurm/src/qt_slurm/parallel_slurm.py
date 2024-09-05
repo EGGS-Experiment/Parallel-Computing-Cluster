@@ -9,10 +9,11 @@ from nbconvert import PythonExporter
 import subprocess
 import socket
 import platform
+import shutil
 
 
 '''
-Qt_Slurm v1.1.15
+Qt_Slurm v1.2.0
 
 See README for version history
 
@@ -259,4 +260,19 @@ def execute(name, nodes, cores, tasks):
                     print("Exiting...")
             except Exception:
                 pass 
-
+            
+            
+def clear():
+    print("Active Jobs:\n")
+    os.system("squeue")
+    ans = input("Do you want to clear all temporary files? This may disrupt any computers/processes currently using the file system.\n")
+    if ans.lower().replace(" ", "") == "yes" or ans.lower().replace(" ", "") =="y":
+        for filename in os.listdir("/home/farmer/temporary_files/"):
+            try:
+                os.remove("/home/farmer/temporary_files/" + filename)
+            except:
+                try:
+                    shutil.rmtree("/home/farmer/temporary_files/" + filename)
+                except Exception:
+                    pass
+    print("\nDeleted all temporary files!")
