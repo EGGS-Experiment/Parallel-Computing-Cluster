@@ -8,7 +8,7 @@ Slurm is a workload manager that will allocate tasks and resources in a computin
 This part of the guide is for the integration of Qutip and Slurm. Please note that I have created a Python package that does everything seen below. Link can be found here: 
 https://test.pypi.org/project/qt-slurm/0.1.10/
 
-Also available in this repo under [qt_slurm](https://github.com/dylankawashiri/hudsonlab/tree/main/Parallel%20Computing%20Cluster/qt_slurm).
+Also available in this repo under [qt_slurm](https://github.com/EGGS-Experiment/Parallel-Computing-Cluster/tree/main/qt_slurm).
 
 ### Parallel Map
 You will need to use Qutip's [parallel map](https://qutip.org/docs/4.0.2/guide/guide-parfor.html) function for integration with Slurm. Parallel map's parameters are a function and the array/vars that you will call that function with. Parallel map will assign one calculation of the array to one available CPU core. With n cores, you can process up to n calculations simultaneously. If you have more than n possible calculations, the extra cores will speed up any remaining calculations. 
