@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qt_slurm"
+version = "1.1.15"
+authors = [
+  { name="Dylan Kawashiri", email="dkawashiri@physics.ucla.edu" },
+]
+description = "Slurm integration package"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
