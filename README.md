@@ -1,12 +1,12 @@
 # Parallel Computing Cluster (Farm) Guide
-This is a guide on how to optimize your code for use in the Farm cluster. Please note that all of the systems run on Linux. 
+This is a guide on how to optimize your code for use in the Farm cluster. Please note that all of the systems utilizing Slurm only run on Linux. 
 
 ## Slurm
 Slurm is a workload manager that will allocate tasks and resources in a computing cluster. It **will not** parallelize your code for you and will only 'accelerate' any code that is built for parallelization in the first place. All Slurm commands are executed via text files and/or the command line. 
 
 ## Python via Slurm
-This part of the guide is for the integration of Qutip and Slurm. Please note that I have created a Python package that does everything seen below. Link can be found here: 
-https://test.pypi.org/project/qt-slurm/0.1.10/
+This part of the guide is for the integration of Qutip and Slurm. Please note that I have created a Python package that does everything seen below. The link can be found here: 
+https://test.pypi.org/project/qt-slurm/
 
 Also available in this repo under [qt_slurm](https://github.com/EGGS-Experiment/Parallel-Computing-Cluster/tree/main/qt_slurm).
 
@@ -42,45 +42,68 @@ parallel_map(detuning_func,detunings_arr[i])
 
 This output will not tell you anything useful. However, converting the result to an array will give you the results of your initial function. 
 
-### Splitting the code
-You must split up your code to take advantage of the available nodes. This can be done by taking advantage of the system variables that Slurm assigns to each node upon execution of the code. Slurm will assign each node a node or rank (1 through n where n is the number of nodes requested/in use). 
-
-This can be determined through the following (code from ChatGPT):
-```
-rank = int(os.getenv('SLURM_PROCID', 0))
-    total_ranks = int(os.getenv('SLURM_NTASKS', 1))
-    print(f"Rank: {rank+1}/{total_ranks}")
-```
-None of the variables that you execute will be shared between computers, so you will not need to initialize the rank value into an array. 
-
-I found the best way to split the code was by assigning each computer a certain number of calculations based on the rank Slurm had assigned. 
-First step:
-
-```
-split = num_of_divs // total_ranks #1
-split_arr = [] 
-for i in range(total_ranks):
-    split_arr.append(split)
-for i in range(num_of_divs % total_ranks): #2
-    split_arr[i]+=1
-```
-1) Division (floor) of the total number of divisions in the function by the total number of computers being used
-2) Takes the modulus of the number of divisions by the total number of computers and adds the remainder to one of the computers
-
-Second step:
-
-```
-for i in range(total_ranks):
-    if i == 0:
-        detunings_arr.append(detunings[i:split_arr[i]])
-    else:
-        detunings_arr.append(detunings[sum(split_arr[:i]):sum(split_arr[:i])+split_arr[i]])
-```
-
-As mentioned before, there is no way to store the results in a common variable. We therefore must use a temporary shared file system between the nodes. This has already been set up. If you are looking to set up your own file system, see here. 
+See [qt_slurm](https://github.com/EGGS-Experiment/Parallel-Computing-Cluster/tree/main/qt_slurm) for more details about integrating Python (including Jupyter Notebook) with Qutip and Slurm. 
 
 
 ### File Sharing
-In order for Slurm to work, you must distribute the Python file you wish to parallelize to all nodes in the cluster. This can be done by uploading the files to the mounted folder at location "$HOME/shared_scripts" (this folder is available on all nodes). This will automatically distribute the file. 
+In order for Slurm to work, you must distribute the Python file you wish to parallelize to all nodes in the cluster. This can be done by uploading the files to the mounted folder at location "$HOME/shared_scripts/" (this folder is available on all nodes). This will automatically distribute the file. See [qt_slurm](https://github.com/EGGS-Experiment/Parallel-Computing-Cluster/tree/main/qt_slurm) for doing this with Jupyter Notebooks.  
+
+## Sending Files to Slurm
+There are two ways to start a Slurm job.
+
+### srun
+The easiest way to start a Slurm job is to use [srun](https://slurm.schedmd.com/srun.html). Generally, this can be done in the command line:
+
+```
+srun --ntasks num_of_tasks --cpus-per-task num_of_cores --nodes num_of_nodes (terminal comamand to execute code)
+```
+which is equivalent to:
+```
+srun -n num_of_tasks -c num_of_cores -N num_of_nodes (terminal comamand to execute code)
+```
+It is recommended you set the number of tasks equivalent to the number of nodes you are planning on using. For example, if you are planning on using six nodes and eight cores per computer to execute a python script called script.py, your srun command would look like:
+```
+srun -n 6 -c 8 -N 6 python script.py
+```
+or
+```
+srun --ntasks 6 --cpus-per-task 8 --nodes 6 python script.py
+```
+
+### sbatch
+You can additionally use [sbatch](https://slurm.schedmd.com/sbatch.html) to execute jobs. Sbatch is a text files that will tell the cluster how many nodes, cores, memory, etc., etc. to allocate. [Here](https://www.google.com/url?q=https://www.arch.jhu.edu/short-tutorial-how-to-create-a-slurm-script/&sa=D&source=docs&ust=1725523688658699&usg=AOvVaw29U_ikFikwKmmbhnq2kSp3) is a good guide on how to write a script. Ignore usage of modules, they are only used to load Python which is already active on all computers. 
+
+An example heading to your script:
+```
+#!/bin/bash
+#SBATCH --nodes=2
+#SBATCH --time=00:05:00
+#SBATCH --output=$HOME/sim_data/outputs/%j_out.txt
+#SBATCH --error=$HOME/sim_data/outputs//error_msgs/%j_err.txt
+```
+Here, the number of nodes, the total time allotted, the location for the output of the code, and the location for any potential error messages are specified. There are many other options that you can add for further customization. Each Slurm command must start with an #SBATCH indicator. The $HOME/sim_data/ folder is mounted across all nodes in the computer so any additions in one folder will be reflected in a folder at the same path on all nodes. 
+
+Following this, you can add any terminal commands you need to run your code. This can include activating a virtual environment, making a directory, and more. Following the example seen in the srun section, an example sbatch script may look like:
+```
+#!/bin/bash
+#SBATCH --nodes=6
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks=6
+#SBATCH --output=$HOME/sim_data/outputs/%j_out.txt
+#SBATCH --error=$HOME/sim_data/outputs//error_msgs/%j_err.txt
+
+python script.py
+```
+
+### Note on different usernames/Home directories
+For this demonstration, I will be referring to the 'python script.py' example. When writing python script.py (in terminal or with Slurm), you are essentially writing $HOME/path/to/python $HOME/script.py (assuming you are executing the script out of your $HOME directory). This $HOME directory is the directory of whichever computer you are running the script from. For example, if you are running srun from a computer with directory /home/farmer and one of the nodes has home directory /home/farmer_different, the farmer_different computer will receive the command as /home/farmer/path/to/python /home/farmer/script.py. However, this computer will have each of these stored at /home/farmer_different/path/to/python and /home/farmer_different/script.py, meaning that the execution of any Slurm commands will only work if the Home directories are the same.
+
+
+This, however, is not a reasonable thing to assume. Therefore, if there are multiple nodes with different usernames/Home directories, you must create a Symbolic Link using [symlink](https://www.freecodecamp.org/news/symlink-tutorial-in-linux-how-to-create-and-remove-a-symbolic-link/). You can create a link between /home/farmer/ and whatever the different Home directory is (for example /home/farmer_different):
+```
+sudo ln -s /home/farmer_different /home/farmer
+```
+
+This will make it so there is a mirrored folder /home/farmer in the farmer_different computer that allows for the farmer_different computer to open files and commands specified to the /home/farmer directory. 
 
 
