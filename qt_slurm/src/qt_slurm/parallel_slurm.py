@@ -10,10 +10,13 @@ import subprocess
 import socket
 import platform
 import shutil
-
+import matplotlib.colors as mcolors
+from matplotlib.widgets import Slider, Button
+from ipywidgets import interact, interactive, fixed, interact_manual
+import ipywidgets as widgets
 
 '''
-Qt_Slurm v1.2.0
+Qt_Slurm v1.3.0
 
 See README for version history
 
@@ -263,16 +266,119 @@ def execute(name, nodes, cores, tasks):
             
             
 def clear():
-    print("Active Jobs:\n")
-    os.system("squeue")
-    ans = input("Do you want to clear all temporary files? This may disrupt any computers/processes currently using the file system.\n")
-    if ans.lower().replace(" ", "") == "yes" or ans.lower().replace(" ", "") =="y":
-        for filename in os.listdir("/home/farmer/temporary_files/"):
-            try:
-                os.remove("/home/farmer/temporary_files/" + filename)
-            except:
+    rank, total_ranks, job_id = get_rank()
+    if job_id == None:
+        ans = input("Do you want to clear all temporary files? This may disrupt any computers/processes currently using the file system.\n")
+        if ans.lower().replace(" ", "") == "yes" or ans.lower().replace(" ", "") =="y":
+            for filename in os.listdir("/home/farmer/temporary_files/"):
                 try:
-                    shutil.rmtree("/home/farmer/temporary_files/" + filename)
-                except Exception:
-                    pass
-    print("\nDeleted all temporary files!")
+                    os.remove("/home/farmer/temporary_files/" + filename)
+                except:
+                    try:
+                        shutil.rmtree("/home/farmer/temporary_files/" + filename)
+                    except Exception:
+                        pass
+        print("\nDeleted all temporary files!")
+    else:
+        print("There is currently a job running... Try again later.")
+    
+
+
+def graph_viewer():
+    '''
+    Callable functions from ChatGPT, only compatiable with Jupyter Notebook
+    '''
+    job_id = os.getenv('SLURM_JOB_ID')
+    home_dir = os.getenv('HOME')
+    
+    if job_id == None:
+        if ask.lower().replace(" ", "") == "yes" or ask.lower().replace(" ", "") =="y":
+            options = {
+                "title":"Title of Graph: \n",
+                "xlabel":"x Label: \n",
+                "ylabel":"y Label: \n",
+                "color":"Color of Plot: \n",
+                "legend":"Legend: \n",
+            }
+
+            ans = {}
+            def title(title):
+                ans['title']=title
+            def xlab(xlabel):
+                ans['xlabel']=xlabel
+            def ylab(ylabel):
+                ans['ylabel']=ylabel
+            def color(color):
+                if color.lower() not in mcolors.CSS4_COLORS:
+                    print(color + " is not a color option, please enter a different color.")
+                else:
+                    print("")
+                    ans['color']=color
+            def legend(legend):
+                ans['legend']=legend
+            interact(title, title='Enter Title')
+            interact(xlab, xlabel='X Label')
+            interact(ylab, ylabel='Y Label')
+            interact(color, color='blue')
+            interact(legend, legend='Legend')
+
+            list_dir = []
+
+            cont = 0
+            for i in os.listdir(home_dir + "/sim_data"):
+                list_dir.append(i.split(".")[0])
+            while cont ==0:
+                try:
+                    for i in range(len(list_dir)):
+                        try:
+                            list_dir[i]=int(list_dir[i])
+                        except:
+                            list_dir.remove(list_dir[i])
+                    cont = 1
+                except:
+                    continue
+
+
+            list_dir=list(set(list_dir))
+            list_dir.sort()
+            def f(x, Save_Image):
+                graph_arr = []
+                try:
+                    with open(home_dir + "/sim_data/" + str(list_dir[x]) + ".csv", newline='') as csvfile:
+                        reader = csv.reader(csvfile, delimiter=',', quotechar='"',quoting=csv.QUOTE_MINIMAL)
+                        for row in reader:
+                            graph_arr = row
+                    for i in range(len(graph_arr)):
+                        graph_arr[i]=float(graph_arr[i])
+
+                    for func_name in ans:
+                    # Get the function from pyplot using getattr
+                        func = getattr(plt, func_name, None)
+                        if func and callable(func):
+                            graph = func(ans[func_name])
+                        else:
+                            pass
+                    print("Data from: " + str(list_dir[x])+".csv")
+                    graph = plt.plot(np.array(range(len(graph_arr))), graph_arr, color = ans["color"])
+                    graph = plt.legend([ans["legend"]])
+                except:
+                    print("Not an available CSV")
+                if Save_Image:
+                    if not os.path.isfile(home_dir + "/sim_data/" + ans["title"] + "_" + str(list_dir[x])+"csv"+".png"): 
+                        graph = plt.savefig(home_dir + "/sim_data/" + ans["title"] + "_" + str(list_dir[x])+"csv"+".png") 
+                    else:
+                        n = 1
+                        q = 0
+                        while q ==0:
+                            if not os.path.isfile(home_dir + "/sim_data/" + ans["title"] + "_" + str(list_dir[x])+"csv" + str(n) + ".png"):
+                                graph = plt.savefig(home_dir + "/sim_data/" + ans["title"] + "_" + str(list_dir[x])+"csv" + str(n) +".png")
+                                q = 1
+                                Save_Image=False
+                            else:
+                                n+=1
+
+            w = interactive(f, Save_Image = False, x=(0,len(list_dir)))
+            display(w)
+        except:
+            pass
+
