@@ -1,33 +1,6 @@
 # Qt_Slurm v1.3.0
 This package is meant for Qutip integration with Slurm on Linux based systems. Please let me know if there are any bugs. 
 
-## Release History
-
-- v0.0.1-0.1.10 - Bug fixes (previous versions are fatal)
-- v0.1.11 - Added return value to parallelize function, fixed deletion of job storage 
-- v0.2.1 - Added Jupyter notebook integration, $HOME generalization
-- v0.2.2 - Fixed fatal bug with import
-- v1.0.0 - First release, removed safety feature (not necessary), removed unnecessary comments, created initialization function, working Jupyter notebook loop and deletion (if necessary)
-- v1.0.1 - Forgot to add $HOME variable to initialization function
-- v1.0.2 - Added exception to loop in execute() function
-- v1.0.3 - Added a waiting period in the execute() function - immediate execution was previously leading to Slurm executing older scripts that had not been deleted yet (can be fatal)
-- v1.1.1 - Incorporated initialization() function into execute script, added plot showing capabilities, added automatic title and x labels, included Linux only parameter, included job_id with get_rank() (fatal)
-- v1.1.2 - Forgot to include third parameter in new get_rank() function (fatal)
-- v1.1.3 - Fixed job_id being called before Slurm job start (fatal)
-- v1.1.4 - Added condition to set initial loop value (fatal)
-- v1.1.5 - Readded home_dir var to execute() funciton
-- v1.1.6 - Fixed printing of each computer rank, added printing job_id (fatal) 
-- v1.1.7 - Added timing function (fatal)
-- v1.1.8 - Changed plot name finding location (fatal)
-- v1.1.9 - Fixed calling of job_id in execute function
-- v1.1.10 - Never added creation of temporary file for loop 
-- v1.1.11 - Fixed issue where I wrote isdir instead of isfile in execute() function (fatal)
-- v1.1.12 - Forgot to delete code (can be fatal)
-- v1.1.13 - Added if job_id hasn't been defined, continue loop, else stop - removes need for temporary execute file
-- v1.1.14 - Fixed title of graph bug
-- v1.1.15 - Changed location of timing variable
-- v1.2.0 - Added clear() function
-- v1.3.0 - Added graph_viewer() function
 ## Installation
 ### Required Installations:
 - qutip<=4.7.6
@@ -166,3 +139,33 @@ None
 **Output**:
 
 Function will display a small GUI within Jupyter Notebook allowing for graphing customizations (as shown above). Will only run if there is no job currently running on the computer in use. 
+
+
+
+## Release History
+
+- v0.0.1-0.1.10 - Bug fixes (previous versions are fatal)
+- v0.1.11 - Added return value to parallelize function, fixed deletion of job storage 
+- v0.2.1 - Added Jupyter notebook integration, $HOME generalization
+- v0.2.2 - Fixed fatal bug with import
+- v1.0.0 - First release, removed safety feature (not necessary), removed unnecessary comments, created initialization function, working Jupyter notebook loop and deletion (if necessary)
+- v1.0.1 - Forgot to add $HOME variable to initialization function
+- v1.0.2 - Added exception to loop in execute() function
+- v1.0.3 - Added a waiting period in the execute() function - immediate execution was previously leading to Slurm executing older scripts that had not been deleted yet (can be fatal)
+- v1.1.1 - Incorporated initialization() function into execute script, added plot showing capabilities, added automatic title and x labels, included Linux only parameter, included job_id with get_rank() (fatal)
+- v1.1.2 - Forgot to include third parameter in new get_rank() function (fatal)
+- v1.1.3 - Fixed job_id being called before Slurm job start (fatal)
+- v1.1.4 - Added condition to set initial loop value (fatal)
+- v1.1.5 - Readded home_dir var to execute() funciton
+- v1.1.6 - Fixed printing of each computer rank, added printing job_id (fatal) 
+- v1.1.7 - Added timing function (fatal)
+- v1.1.8 - Changed plot name finding location (fatal)
+- v1.1.9 - Fixed calling of job_id in execute function
+- v1.1.10 - Never added creation of temporary file for loop 
+- v1.1.11 - Fixed issue where I wrote isdir instead of isfile in execute() function (fatal)
+- v1.1.12 - Forgot to delete code (can be fatal)
+- v1.1.13 - Added if job_id hasn't been defined, continue loop, else stop - removes need for temporary execute file
+- v1.1.14 - Fixed title of graph bug
+- v1.1.15 - Changed location of timing variable
+- v1.2.0 - Added clear() function
+- v1.3.0 - Added graph_viewer() function
