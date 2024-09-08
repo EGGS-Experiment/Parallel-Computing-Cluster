@@ -28,12 +28,22 @@ This package is meant for Qutip integration with Slurm on Linux based systems. P
 - v1.1.15 - Changed location of timing variable
 - v1.2.0 - Added clear() function
 - v1.3.0 - Added graph_viewer() function
-## How to Use
+## Installation
 ### Required Installations:
 - qutip<=4.7.6
 ### Optional Installations:
 
 - feh (apt-package)
+
+### How to Install:
+
+```cmd
+pip install -i https://test.pypi.org/simple/ qt-slurm
+```
+
+
+
+## How to Use
 
 ### Required Steps:
 
@@ -63,7 +73,7 @@ Once you execute the last cell, the conversion will occur and the script will co
 
 ### Python
 
-If using Python, you will only need to use the pqt.parallelize() function. This just needs to be added 
+If using Python, you will only need to use the pqt.parallelize() function. This should be added to the end of your code with the necessary arguments. 
 
 ### Graphing
 
@@ -78,3 +88,81 @@ Note that running this function does not backlog any other usage of other functi
 ![Enter Title_21csv](/Users/dylankawashiri/Downloads/Enter Title_21csv.png)
 
 Example of the live preview and saved image. 
+
+## Callable Functions
+
+```python
+from qt_slurm import parallel_slurm as pqt
+```
+
+### Parallelize()
+
+```python
+pqt.parallelize(func, num_range, num_of_divs)
+```
+
+**Arguments**: 
+
+- func
+  - Parallelizable function (should already be defined)
+- num_range
+  - Argument of 'func'
+- num_of_divs
+  - Number of divisions 
+
+**Output**:
+
+Parallelizes script only using Qutip's parallel_map function, **must be used with Slurm**. When used with a Slurm command, this function will split up the range of values and assign them to each node. 
+
+Returns the results of the computation, additionally outputs the data and graph of the data locally.  
+
+### Execute()  -- Specific to Jupyter Notebook
+
+```python
+pqt.execute("Name_of_notebook", num_of_nodes, num_of_cores, num_of_tasks)
+```
+
+**Arguments**:
+
+- "Name_of_notebook"
+  - The name (path optional, may prevent bugs or FileNotFound errors)
+- num_of_nodes
+  - Slurm command - requests the number of nodes to be used for the job
+- num_of_cores
+  - Slurm command - requests the number of cores to be used by each node (all Farm computers have 8 cores)
+- num_of_tasks
+  - Slurm command - The number of times the notebook will be sent out, *set equal to num_of_nodes*
+
+**Output**:
+
+Function will convert the Jupyter Notebook to an executable Python file. The Python file and job allocation request (in the form of srun) will be sent to Slurm.
+
+### Clear()
+
+```python
+pqt.clear()
+```
+
+**Arguments**:
+
+None
+
+**Output**:
+
+The clear() function will empty the temporary file folder if there is no job running. This function is not vital to be used and should only be used if you are running out of space/do not know how to find the temporary_files folder ($HOME/temporary_files).
+
+### Graph_Viewer -- Specific to Jupyter Notebook
+
+```python
+pqt.graph_viewer()
+```
+
+
+
+**Arguments**:
+
+None
+
+**Output**:
+
+Function will display a small GUI within Jupyter Notebook allowing for graphing customizations (as shown above). Will only run if there is no job currently running on the computer in use. 
