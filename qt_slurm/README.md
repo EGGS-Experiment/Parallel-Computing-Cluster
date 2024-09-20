@@ -1,17 +1,17 @@
-# Qt_Slurm v1.3.0
-This package is meant for Qutip integration with Slurm on Linux based systems. Please let me know if there are any bugs. 
+# Qt_Slurm v1.4.0
+This package is meant for Qutip integration with Slurm on Linux based systems.
 
 ## Installation
 ### Required Installations:
 - qutip<=4.7.6
 ### Optional Installations:
 
-- feh (apt-package)
+- feh (apt-package) - Displays graphs/images via command line
 
 ### How to Install:
 
 ```cmd
-pip install -i https://test.pypi.org/simple/ qt-slurm
+pip install qt-slurm
 ```
 
 
@@ -30,7 +30,7 @@ from qt_slurm import parallel_slurm as pqt
 If using Jupyter Notebook, at the end of your code (in the same cell as the last thing you wish to run), implement the parallelize function.
 
 ```python
-pqt.parallelize(func, num_range, num_of_divs)
+result = pqt.parallelize(func, num_range, num_of_divs)
 ```
 The first parameter of pqt.parallelize is 'func'. This is the function you wish to parallelize (usually a function incorporating the mesolve/sesolve functions of Qutip). The 'num_range' parameter is the parameter of the other 'func' function. This is usually the range as to which your are calculating mesolve/sesolve over. Finally, the final parameter, num_of_divs, is the number of points within your range. If using np.linspace() function, it is the final parameter entered. 
 
@@ -62,7 +62,7 @@ Note that running this function does not backlog any other usage of other functi
 
 Example of the live preview and saved image. 
 
-## Callable Functions
+## Functions
 
 ```python
 from qt_slurm import parallel_slurm as pqt
@@ -124,13 +124,13 @@ None
 
 The clear() function will empty the temporary file folder if there is no job running. This function is not vital to be used and should only be used if you are running out of space/do not know how to find the temporary_files folder ($HOME/temporary_files).
 
+
+
 ### Graph_Viewer -- Specific to Jupyter Notebook
 
 ```python
 pqt.graph_viewer()
 ```
-
-
 
 **Arguments**:
 
@@ -139,6 +139,22 @@ None
 **Output**:
 
 Function will display a small GUI within Jupyter Notebook allowing for graphing customizations (as shown above). Will only run if there is no job currently running on the computer in use. 
+
+
+
+### Get_CSV -- Specific to Jupyter Notebook
+
+```python
+pqt.get_csv()
+```
+
+**Arguments:** 
+
+None
+
+**Output:**
+
+Displays a dropdown box that outputs a list to the variable, csv_data. 
 
 
 
@@ -169,3 +185,6 @@ Function will display a small GUI within Jupyter Notebook allowing for graphing 
 - v1.1.15 - Changed location of timing variable
 - v1.2.0 - Added clear() function
 - v1.3.0 - Added graph_viewer() function
+- v1.3.3 - Fixed various fatal bugs
+- v1.3.4 - Fixed bug that would cause Graph_viewer() function to not work
+- v1.4.0 - Added support for functions that do not automatically take the expectation value, added ability to get variables from CSVs
